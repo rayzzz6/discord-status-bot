@@ -1,25 +1,24 @@
-const { Client, ActivityType } = require('discord.js');
+const { Client, EmbedBuilder } = require('discord.js');
 
 const client = new Client({ intents: [] });
 
-const statuses = [
-  '🌐 play.centricxmc.in:25565',
-  '⚠️ Bedrock Under Maintenance',
-  '🎮 CentricXMC Network'
-];
+const CHANNEL_ID = '1516764241288237136';
 
-client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+client.once('clientReady', async () => {
+    console.log(`Logged in as ${client.user.tag}`);
 
-  let i = 0;
+    const channel = await client.channels.fetch(CHANNEL_ID);
 
-  setInterval(() => {
-    client.user.setActivity(statuses[i], {
-      type: ActivityType.Watching
-    });
+    const embed = new EmbedBuilder()
+        .setTitle('🌐 CentricXMC Server Status')
+        .setDescription(
+            '**Java IP:** `play.centricxmc.in:25565`\n' +
+            '**Bedrock:** ⚠️ Under Maintenance\n' +
+            '**Status:** 🟢 Online'
+        )
+        .setTimestamp();
 
-    i = (i + 1) % statuses.length;
-  }, 10000);
+    await channel.send({ embeds: [embed] });
 });
 
 client.login(process.env.TOKEN);

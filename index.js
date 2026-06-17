@@ -12,7 +12,7 @@ client.once('clientReady', async () => {
     const embed = new EmbedBuilder()
         .setTitle('🌐 CentricXMC Server Status')
         .setDescription(
-            '**Java IP:** `play.centricxmc.in:25565`\n' +
+            '**Java IP:** `void.centricxmc.in:25565`\n' +
             '**Bedrock:** ⚠️ Under Maintenance\n' +
             '**Status:** 🟢 Online'
         )

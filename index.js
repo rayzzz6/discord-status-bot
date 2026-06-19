@@ -1,39 +1,49 @@
 const { Client, EmbedBuilder } = require('discord.js');
-const util = require('minecraft-server-util');
 
 const client = new Client({ intents: [] });
 
 const CHANNEL_ID = '1516764241288237136';
-const HOST = 'void.centricxmc.in';
-const PORT = 25565;
+const SERVER = 'void.centricxmc.in';
 
 client.once('clientReady', async () => {
     console.log(`Logged in as ${client.user.tag}`);
 
     const channel = await client.channels.fetch(CHANNEL_ID);
-    let message;
+    let message = null;
 
     async function updateStatus() {
         try {
-            const status = await util.status(HOST, PORT);
+            const res = await fetch(`https://api.mcstatus.io/v2/status/java/${SERVER}`);
+            const data = await res.json();
+
+            const online = data.online ? "🟢 Online" : "🔴 Offline";
+            const players = data.players ? `${data.players.online}/${data.players.max}` : "0/0";
+            const version = data.version?.name_clean || "Unknown";
 
             const embed = new EmbedBuilder()
-                .setColor('#57F287')
-                .setTitle('🌌 CentricXMC Network')
+                .setColor(data.online ? "#57F287" : "#ED4245")
+                .setTitle("🌌 CentricXMC Network")
                 .setDescription(
-`🟢 **Status:** Online
+`**🟢 Status:** ${online}
 
-👥 **Players:** ${status.players.online}/${status.players.max}
-📦 **Version:** ${status.version.name}
+👥 **Players:** ${players}
+📦 **Version:** ${version}
+
+━━━━━━━━━━━━━━━━━━━━
 
 🖥️ **Java IP**
-\`${HOST}\`
+\`${SERVER}\`
 
 📱 **Bedrock IP**
-\`${HOST}\`
+\`${SERVER}\`
 
 🔌 **Bedrock Port**
-\`25591\``
+\`25591\`
+
+━━━━━━━━━━━━━━━━━━━━
+
+⚔️ Crossplay Enabled
+🛡️ Anti-Cheat Active`
                 )
                 .setTimestamp();
 
@@ -42,24 +52,9 @@ client.once('clientReady', async () => {
             } else {
                 await message.edit({ embeds: [embed] });
             }
-        } catch {
-            const embed = new EmbedBuilder()
-                .setColor('#ED4245')
-                .setTitle('🌌 CentricXMC Network')
-                .setDescription(
-`🔴 **Server Offline**
 
-🖥️ Java IP: \`${HOST}\`
-📱 Bedrock IP: \`${HOST}\`
-🔌 Port: \`25591\``
-                )
-                .setTimestamp();
-
-            if (!message) {
-                message = await channel.send({ embeds: [embed] });
-            } else {
-                await message.edit({ embeds: [embed] });
-            }
+        } catch (err) {
+            console.error(err);
         }
     }
 

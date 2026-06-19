@@ -13,21 +13,17 @@ client.once('clientReady', async () => {
 
     async function updateStatus() {
         try {
-            const res = await fetch(`https://api.mcstatus.io/v2/status/java/${SERVER}`);
-            const data = await res.json();
-
-            const online = data.online ? "🟢 Online" : "🔴 Offline";
-            const players = data.players ? `${data.players.online}/${data.players.max}` : "0/0";
-            const version = data.version?.name_clean || "Unknown";
+            const response = await fetch(`https://api.mcstatus.io/v2/status/java/${SERVER}`);
+            const data = await response.json();
 
             const embed = new EmbedBuilder()
-                .setColor(data.online ? "#57F287" : "#ED4245")
-                .setTitle("🌌 CentricXMC Network")
+                .setColor(data.online ? '#57F287' : '#ED4245')
+                .setTitle('🌌 CentricXMC Network')
                 .setDescription(
-`**🟢 Status:** ${online}
+`🟢 **Status:** ${data.online ? 'Online' : 'Offline'}
 
-👥 **Players:** ${players}
-📦 **Version:** ${version}
+👥 **Players:** ${data.players?.online ?? 0}/${data.players?.max ?? 0}
+📦 **Version:** ${data.version?.name_clean ?? 'Unknown'}
 
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -52,9 +48,8 @@ client.once('clientReady', async () => {
             } else {
                 await message.edit({ embeds: [embed] });
             }
-
         } catch (err) {
-            console.error(err);
+            console.error("Status update failed:", err);
         }
     }
 

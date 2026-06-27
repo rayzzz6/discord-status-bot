@@ -8,28 +8,28 @@ const INFO_CHANNEL_ID = '1499371508206669917';
 const SERVER = 'void.centricxmc.in';
 
 let messageData = {
-    statusMessageId: '',
-    infoMessageId: ''
+  statusMessageId: '',
+  infoMessageId: ''
 };
 
 if (fs.existsSync('./messages.json')) {
-    messageData = JSON.parse(fs.readFileSync('./messages.json', 'utf8'));
+  messageData = JSON.parse(fs.readFileSync('./messages.json', 'utf8'));
 }
 
 function saveMessages() {
-    fs.writeFileSync('./messages.json', JSON.stringify(messageData, null, 2));
+  fs.writeFileSync('./messages.json', JSON.stringify(messageData, null, 2));
 }
 
 client.once('clientReady', async () => {
-    console.log(`Logged in as ${client.user.tag}`);
+  console.log(`Logged in as ${client.user.tag}`);
 
-    const statusChannel = await client.channels.fetch(CHANNEL_ID);
-    const infoChannel = await client.channels.fetch(INFO_CHANNEL_ID);
+  const statusChannel = await client.channels.fetch(CHANNEL_ID);
+  const infoChannel = await client.channels.fetch(INFO_CHANNEL_ID);
 
-    const infoEmbed = new EmbedBuilder()
-        .setColor('#8A2BE2')
-        .setTitle('🌌 CentricXMC Network')
-        .setDescription(`
+  const infoEmbed = new EmbedBuilder()
+    .setColor('#8A2BE2')
+    .setTitle('🌌 CentricXMC Network')
+    .setDescription(`
 🖥️ **Java Edition**
 ➤ \`${SERVER}\`
 
@@ -48,41 +48,45 @@ client.once('clientReady', async () => {
 
 🚀 Join now and start your adventure!
 `)
-        .setTimestamp();
+    .setTimestamp();
 
-    let infoMessage;
+  let infoMessage;
+
+  try {
+    if (messageData.infoMessageId) {
+      infoMessage = await infoChannel.messages.fetch(messageData.infoMessageId);
+      await infoMessage.edit({ embeds: [infoEmbed] });
+    } else {
+      infoMessage = await infoChannel.send({ embeds: [infoEmbed] });
+      messageData.infoMessageId = infoMessage.id;
+      saveMessages();
+    }
+  } catch {
+    infoMessage = await infoChannel.send({ embeds: [infoEmbed] });
+    messageData.infoMessageId = infoMessage.id;
+    saveMessages();
+  }
+
+  async function updateStatus() {
+    console.log("Updating status...");
 
     try {
-        if (messageData.infoMessageId) {
-            infoMessage = await infoChannel.messages.fetch(messageData.infoMessageId);
-            await infoMessage.edit({ embeds: [infoEmbed] });
-        } else {
-            infoMessage = await infoChannel.send({ embeds: [infoEmbed] });
-            messageData.infoMessageId = infoMessage.id;
-            saveMessages();
-        }
-    } catch {
-        infoMessage = await infoChannel.send({ embeds: [infoEmbed] });
-        messageData.infoMessageId = infoMessage.id;
-        saveMessages();
-    }
+      const res = await fetch(`https://api.mcstatus.io/v2/status/java/${SERVER}`);
+      const data = await res.json();
 
-    async function updateStatus() {
-        try {
-            const res = await fetch(`https://api.mcstatus.io/v2/status/java/${SERVER}`);
-            const data = await res.json();
+      console.log("Status received:", data.online);
 
-            const online = data.online ? '🟢 Online' : '🔴 Offline';
-            const players = data.players
-                ? `${data.players.online}/${data.players.max}`
-                : '0/0';
-            const version = data.version?.name_clean || 'Unknown';
+      const online = data.online ? '🟢 Online' : '🔴 Offline';
+      const players = data.players
+        ? `${data.players.online}/${data.players.max}`
+        : '0/0';
+      const version = data.version?.name_clean || 'Unknown';
 
-            const embed = new EmbedBuilder()
-                .setColor(data.online ? '#57F287' : '#ED4245')
-                .setTitle('🌌 CentricXMC Network')
-                .setDescription(`
-**🟢 Status:** ${online}
+      const embed = new EmbedBuilder()
+        .setColor(data.online ? '#57F287' : '#ED4245')
+        .setTitle('🌌 CentricXMC Network')
+        .setDescription(`
+🟢 **Status:** ${online}
 
 👥 **Players:** ${players}
 📦 **Version:** ${version}
@@ -103,32 +107,37 @@ client.once('clientReady', async () => {
 ⚔️ Crossplay Enabled
 🛡️ Anti-Cheat Active
 `)
-                .setTimestamp();
+        .setTimestamp();
 
-            let statusMessage;
+      let statusMessage;
 
-            try {
-                if (messageData.statusMessageId) {
-                    statusMessage = await statusChannel.messages.fetch(messageData.statusMessageId);
-                    await statusMessage.edit({ embeds: [embed] });
-                } else {
-                    statusMessage = await statusChannel.send({ embeds: [embed] });
-                    messageData.statusMessageId = statusMessage.id;
-                    saveMessages();
-                }
-            } catch {
-                statusMessage = await statusChannel.send({ embeds: [embed] });
-                messageData.statusMessageId = statusMessage.id;
-                saveMessages();
-            }
-
-        } catch (err) {
-            console.error(err);
+      try {
+        if (messageData.statusMessageId) {
+          statusMessage = await statusChannel.messages.fetch(messageData.statusMessageId);
+          await statusMessage.edit({ embeds: [embed] });
+        } else {
+          statusMessage = await statusChannel.send({ embeds: [embed] });
+          messageData.statusMessageId = statusMessage.id;
+          saveMessages();
         }
-    }
+      } catch {
+        statusMessage = await statusChannel.send({ embeds: [embed] });
+        messageData.statusMessageId = statusMessage.id;
+        saveMessages();
+      }
 
-    await updateStatus();
-    setInterval(updateStatus, 30000);
+    } catch (err) {
+      console.error("Update Error:", err);
+    }
+  }
+
+  await updateStatus();
+
+  setInterval(() => {
+    console.log("Interval triggered");
+    updateStatus();
+  }, 30000);
+
 });
 
 client.login(process.env.TOKEN);

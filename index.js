@@ -168,4 +168,4 @@ Staff decisions are final. By playing on CentricXMC, you agree to follow these r
   setInterval(updateStatus, 60000);
 });
 
-client.login('YOUR_BOT_TOKEN');
+client.login(process.env.DISCORD_TOKEN);

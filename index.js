@@ -5,6 +5,7 @@ const client = new Client({ intents: [] });
 
 const CHANNEL_ID = '1516764241288237136';
 const INFO_CHANNEL_ID = '1499371508206669917';
+const RULES_CHANNEL_ID = '1516485070377058435';
 const SERVER = 'void.centricxmc.in';
 
 let messageData = {
@@ -25,6 +26,7 @@ client.once('clientReady', async () => {
 
   const statusChannel = await client.channels.fetch(CHANNEL_ID);
   const infoChannel = await client.channels.fetch(INFO_CHANNEL_ID);
+  const rulesChannel = await client.channels.fetch(RULES_CHANNEL_ID);
 
   const infoEmbed = new EmbedBuilder()
     .setColor('#8A2BE2')
@@ -66,6 +68,38 @@ client.once('clientReady', async () => {
     messageData.infoMessageId = infoMessage.id;
     saveMessages();
   }
+
+  // ---- RULES EMBED ----
+  const rulesEmbed = new EmbedBuilder()
+    .setColor('#8A2BE2')
+    .setTitle('CENTRICXMC RULES')
+    .setDescription(`
+CentricXMC is an anarchy server, which means griefing, raiding, PvP, stealing, trapping, and base hunting are allowed.
+
+However, the use of hacked clients, cheats, exploits, or any unfair advantage is strictly prohibited. Excessive harassment, threats, hate speech, and disrespect toward players or staff are not allowed. The use of offensive language, slurs, adult jokes, sexual content, or inappropriate discussions is prohibited. Advertising other servers, communities, or services without permission is not allowed. Any attempt to crash, lag, damage, or disrupt the server will result in punishment.
+
+Staff decisions are final. By playing on CentricXMC, you agree to follow these rules and help maintain a fair and respectful community for everyone.
+`)
+    .setTimestamp();
+
+  try {
+    const messages = await rulesChannel.messages.fetch({ limit: 10 });
+
+    const botMessage = messages.find(
+      m => m.author.id === client.user.id &&
+      m.embeds.length > 0 &&
+      m.embeds[0].title === 'CENTRICXMC RULES'
+    );
+
+    if (botMessage) {
+      await botMessage.edit({ embeds: [rulesEmbed] });
+    } else {
+      await rulesChannel.send({ embeds: [rulesEmbed] });
+    }
+  } catch (err) {
+    console.error('Rules embed error:', err);
+  }
+  // ---- END RULES EMBED ----
 
   async function updateStatus() {
     console.log("Updating status...");
@@ -125,19 +159,13 @@ client.once('clientReady', async () => {
         messageData.statusMessageId = statusMessage.id;
         saveMessages();
       }
-
     } catch (err) {
-      console.error("Update Error:", err);
+      console.error('Status update error:', err);
     }
   }
 
-  await updateStatus();
-
-  setInterval(() => {
-    console.log("Interval triggered");
-    updateStatus();
-  }, 30000);
-
+  updateStatus();
+  setInterval(updateStatus, 60000);
 });
 
-client.login(process.env.TOKEN);
+client.login('YOUR_BOT_TOKEN');

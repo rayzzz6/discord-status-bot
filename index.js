@@ -168,6 +168,6 @@ Staff decisions are final. By playing on CentricXMC, you agree to follow these r
   setInterval(updateStatus, 60000);
 });
 
-console.log('TOKEN EXISTS:', !!process.env.DISCORD_TOKEN);
-console.log('TOKEN LENGTH:', process.env.DISCORD_TOKEN ? process.env.DISCORD_TOKEN.length : 0);
-client.login(process.env.DISCORD_TOKEN);
+console.log('TOKEN EXISTS:', !!process.env.TOKEN);
+console.log('TOKEN LENGTH:', process.env.TOKEN ? process.env.TOKEN.length : 0);
+client.login(process.env.TOKEN);

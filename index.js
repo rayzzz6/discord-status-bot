@@ -6,7 +6,7 @@ const client = new Client({ intents: [] });
 const CHANNEL_ID = '1516764241288237136';
 const INFO_CHANNEL_ID = '1499371508206669917';
 const RULES_CHANNEL_ID = '1516485070377058435';
-const SERVER = 'void.centricxmc.in';
+const SERVER = 'centricxmc.ice.lol';
 
 let messageData = {
   statusMessageId: '',
@@ -37,7 +37,7 @@ client.once('clientReady', async () => {
 
 📱 **Bedrock Edition**
 ➤ \`${SERVER}\`
-➤ Port: \`25591\`
+➤ Port: \`25604\`
 
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -134,7 +134,7 @@ Staff decisions are final. By playing on CentricXMC, you agree to follow these r
 \`${SERVER}\`
 
 🔌 **Bedrock Port**
-\`25591\`
+\`25604\`
 
 ━━━━━━━━━━━━━━━━━━━━
 
